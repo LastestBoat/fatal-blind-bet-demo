@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, get, set, update, onValue, remove } from "firebase/database";
 
+// 1) 在 Firebase 控制台创建 Web App + Realtime Database。
+// 2) 把配置粘到这里。
+// 3) 发布到 Vercel / Netlify 后，4 个测试者用同一个房间码进入。
 const firebaseConfig = {
   apiKey: "AIzaSyA7rrpAnDdDxJCUIvypXGwle80r5vQym4M",
   authDomain: "bet-test-v1.firebaseapp.com",
@@ -12,8 +15,8 @@ const firebaseConfig = {
   appId: "1:584623607407:web:8abb53810734f95f52079a"
 };
 
-const firebaseReady = !String(FIREBASE_CONFIG.apiKey).startsWith("YOUR_");
-const app = firebaseReady ? initializeApp(FIREBASE_CONFIG) : null;
+const firebaseReady = !String(firebaseConfig.apiKey).startsWith("YOUR_");
+const app = firebaseReady ? initializeApp(firebaseConfig) : null;
 const db = firebaseReady ? getDatabase(app) : null;
 
 const ATTRS = [
