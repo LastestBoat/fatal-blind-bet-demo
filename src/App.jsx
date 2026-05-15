@@ -142,7 +142,8 @@ export default function FatalBlindBetOnlineLite() {
   const [room, setRoom] = useState(null);
   const [bet, setBet] = useState(emptyBet());
   const [target, setTarget] = useState("");
-  const [showAll, setShowAll] = useState(true);
+  const observerMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("observer") === "1";
+  const [showAll, setShowAll] = useState(observerMode);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -152,6 +153,19 @@ export default function FatalBlindBetOnlineLite() {
 
   const players = useMemo(() => Object.values(room?.players || {}).sort((a, b) => a.seat - b.seat), [room]);
   const me = players.find((p) => p.id === pid);
+
+  useEffect(() => {
+    if (!room) return;
+    if (room.phase === "bet") {
+      setBet(emptyBet());
+      setTarget("");
+    }
+    if (room.phase === "attack") {
+      setBet(emptyBet());
+      const firstTarget = players.find((p) => p.alive && p.id !== pid)?.id || "";
+      setTarget(firstTarget);
+    }
+  }, [room?.phase, room?.round, pid]);
   const alive = players.filter((p) => p.alive);
   const allBetReady = alive.length > 1 && alive.every((p) => p.readyBet);
   const allAtkReady = alive.length > 1 && alive.every((p) => p.readyAttack);
@@ -403,7 +417,7 @@ export default function FatalBlindBetOnlineLite() {
             <Pill>阶段：{phaseName}</Pill>
             {room && <Pill>第 {room.round} 回合</Pill>}
             {roomId && <button className="btn secondary" onClick={copyRoom}>{copied ? "已复制" : `房间 ${roomId}`}</button>}
-            <button className="btn secondary" onClick={() => setShowAll(!showAll)}>{showAll ? "关闭测试透视" : "开启测试透视"}</button>
+            {observerMode && <button className="btn secondary" onClick={() => setShowAll(!showAll)}>{showAll ? "关闭观察透视" : "开启观察透视"}</button>
             {roomId && <button className="btn" onClick={resetRoom}>清空房间</button>}
           </div>
         </header>
